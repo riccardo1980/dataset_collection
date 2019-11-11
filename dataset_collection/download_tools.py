@@ -1,34 +1,26 @@
 import os
-from urllib import request
+import sys
+import urllib
 import zipfile
 
-def get(url: str) -> str:
-    """
-        Get resource to string
 
-        :param str url: location of the resource
-        :rtype str
-
-    """
-
-    with request.urlopen(url) as r:
-        return r.read()
-
-def download(url: str, file: str = None) -> None:
+def download(url: str, filename: str = None) -> None:
     """
         Download remote file to local
 
         :param str url: location of the resource
-        :param str file: local file
+        :param str filename: local file
         :rtype None
 
     """
 
-    if not file:
-        file = url.split('/')[-1]
+    def reporthook(count, block_size, total_size):
+        progress = min(int(100 * count * block_size / total_size), 100)
+        sys.stdout.write('\r... {} % of {} MB'.format(progress,
+                                                      total_size//(1024*1024)))
 
-    with open(file, 'wb') as f:
-        f.write(get(url))
+    urllib.request.urlretrieve(url, filename, reporthook)
+
 
 def download_extract(url: str, target: str) -> None:
     """
@@ -46,6 +38,7 @@ def download_extract(url: str, target: str) -> None:
     download(url, temp_file)
 
     if temp_file.endswith('.zip'):
+        print(' ... Extracting')
         with zipfile.ZipFile(temp_file, 'r') as zip_ref:
             zip_ref.extractall(target)
         os.remove(temp_file)
