@@ -2,7 +2,7 @@ import os
 import pathlib
 import pandas as pd
 from dataset_collection.download_tools import download_extract
-
+from typing import List, Tupe
 
 class tiny_imagenet:
     """
@@ -12,8 +12,8 @@ class tiny_imagenet:
     """
 
     def __init__(self,
-                 data_root=os.path.join(os.path.expanduser('~'),
-                                        'dataset_collection')):
+                 data_root: str = os.path.join(os.path.expanduser('~'),
+                                               'dataset_collection')) -> None:
         """
             Check availability
         """
@@ -36,7 +36,7 @@ class tiny_imagenet:
         if not os.path.isdir(self._base_folder):
             download_extract(self._resource_uri, self._base_folder)
 
-    def get_description_map(self):
+    def get_description_map(self) -> Dict[str, str]:
 
         # read full description
         with open(self._labels_description_file) as f:
@@ -57,7 +57,7 @@ class tiny_imagenet:
                       in df.iterrows()}
         return label_desc
 
-    def get_train_dataset(self):
+    def get_train_dataset(self) -> Tuple[List[str], List[str]]:
         """
             Returns a list of URI, label tuples
         """
