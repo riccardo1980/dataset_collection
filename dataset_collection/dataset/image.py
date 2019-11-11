@@ -1,17 +1,34 @@
 import os
 import pathlib
 import pandas as pd
+from dataset_collection.download_tools import download_extract
 
 class tiny_imagenet:
     """
-        returns a dictionary of label description maps
+        Class for accessing tiny-imagenet dataset
+
+        Dataset is described here: https://tiny-imagenet.herokuapp.com/
     """
     
-    def __init__(self, DATASET_ROOT):
-        self._DATASET_ROOT = DATASET_ROOT
-        self._FULL_DESC_FILE = os.path.join(self._DATASET_ROOT, 'words.txt') # classes description
-        self._LABELS_FILE = os.path.join(self._DATASET_ROOT, 'wnids.txt') # subset of classes in this dataset
-        self._TRAIN_SET_FOLDERS = 'train/*/images/*'
+    def __init__(self, data_root=os.path.join(os.path.expanduser('~'),'dataset_collection')):
+        """
+            Check availability
+        """
+        self._BASE_FOLDER = os.path.join(data_root, 'tiny-imagenet-200')
+        self._URI = 'http://cs231n.stanford.edu/tiny-imagenet-200.zip'
+        # full imagenet classes description 
+        self._FULL_DESC_FILE = os.path.join(self._BASE_FOLDER, 'tiny-imagenet-200','words.txt') 
+        
+         # subset of classes in this dataset
+        self._LABELS_FILE = os.path.join(self._BASE_FOLDER, 'tiny-imagenet-200', 'wnids.txt')
+        
+        # template for subfolders in _BASE_FOLDER
+        self._TRAIN_SET_FOLDERS = os.path.join('tiny-imagenet-200','train','*','images','*') 
+        
+        print('BASE_FOLDER: {}'.format(self._BASE_FOLDER))
+
+        if not os.path.isdir(self._BASE_FOLDER):
+            download_extract(self._URI, self._BASE_FOLDER)
 
     def get_description_map(self):
     
@@ -32,7 +49,7 @@ class tiny_imagenet:
         """
             Returns a list of URI, label tuples
         """
-        root_path = pathlib.Path(self._DATASET_ROOT)
+        root_path = pathlib.Path(self._BASE_FOLDER)
         images = root_path.glob(self._TRAIN_SET_FOLDERS)
         uris = [ img.as_posix() for img in images ] 
         labels = [ uri.split('/')[-3] for uri in uris ] 
