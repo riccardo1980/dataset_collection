@@ -2,6 +2,7 @@ import os
 import sys
 import urllib
 import zipfile
+import gzip
 
 
 def download(url: str, filename: str = None) -> None:
@@ -32,13 +33,22 @@ def download_extract(url: str, target: str) -> None:
 
     """
 
-    os.makedirs(target)
+    if not os.path.isdir(target):
+        os.makedirs(target)
     temp_file = os.path.join(target, url.split('/')[-1])
 
     download(url, temp_file)
 
-    if temp_file.endswith('.zip'):
+    target_filename, comp_extension = os.path.splitext(temp_file)
+    if comp_extension == '.zip':
         print(' ... Extracting')
         with zipfile.ZipFile(temp_file, 'r') as zip_ref:
             zip_ref.extractall(target)
+        os.remove(temp_file)
+
+    if comp_extension == '.gz':
+        print(' ... Extracting')
+        with gzip.open(temp_file, 'rb') as infile:
+            with open(target_filename, 'wb') as outfile:
+                outfile.write(infile.read())
         os.remove(temp_file)
